@@ -1,0 +1,20 @@
+- name: configure docker on EC2
+  hosts: new
+  become: true
+  connection: shh
+  tasks:
+    - name: updating apt
+      command: apt update
+
+    - name: Install docker
+      command: apt install -y docker.io
+      become: yes
+      become_user: root
+
+    - name: start docker service
+      command: sudo systemctl start docker
+      become: yes
+      become_root: yes
+
+    - name: Deploy image
+      command: docker run -itd --rm -p 3000:3000 sreedhar8897/zomato:latest
