@@ -1,20 +1,29 @@
-- name: configure docker on EC2
+---
+- name: Configure Docker on EC2
   hosts: new
   become: true
-  connection: shh
+  become_method: sudo
   tasks:
-    - name: updating apt
-      command: apt update
+    - name: Update apt cache
+      apt:
+        update_cache: yes
 
-    - name: Install docker
-      command: apt install -y docker.io
-      become: yes
-      become_user: root
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
 
-    - name: start docker service
-      command: sudo systemctl start docker
-      become: yes
-      become_root: yes
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
 
-    - name: Deploy image
-      command: docker run -itd --rm -p 3000:3000 sreedhar8897/zomato:latest
+    - name: Deploy Docker container
+      docker_container:
+        name: zomato_container
+        image: sreedhar8897/zomato:latest
+        state: started
+        restart_policy: always
+        published_ports:
+          - "3000:3000"
